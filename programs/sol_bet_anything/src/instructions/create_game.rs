@@ -61,8 +61,8 @@ impl<'info> CreateGame<'info> {
             return Err(BetError::InvalidNumberOfOptions.into());
         }
 
-        // Set status based on whether maker is admin
-        if self.maker.key() == admin_config.admin {
+        // Set status based on whether judge is admin
+        if judge == admin_config.admin {
         list.status = 1; // Automatically approved
         } else {
         list.status = 0; // Pending approval

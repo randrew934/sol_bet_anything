@@ -43,7 +43,7 @@ pub mod sol_bet_anything {
 
     pub fn place_bet(ctx: Context<PlaceBet>,         
         options: u8,
-        amount: u16) -> Result<()> {
+        amount: u64) -> Result<()> {
 
         ctx.accounts.place_bet(options, amount, &ctx.bumps)?;
         ctx.accounts.send_sol()
@@ -69,21 +69,24 @@ pub mod sol_bet_anything {
         ctx.accounts.get_game_winners()
     }
 
-    pub fn pay_winner(ctx: Context<PayWinner>) -> Result<()> {
-        ctx.accounts.pay_winner()
+    pub fn pay_winner(ctx: Context<SetBetPeriod>, set_period: u8) -> Result<()> {
+        ctx.accounts.set_period(set_period)
     }
 
     pub fn make_appeal(ctx: Context<MakeAppeal>,
+        bet_key: u64,
         description: String,
         appeal_url: String) -> Result<()> {
 
-        ctx.accounts.make_appeal(description, appeal_url, &ctx.bumps)?;
+        ctx.accounts.make_appeal(bet_key, description, appeal_url, &ctx.bumps)?;
         ctx.accounts.send_sol()
     }
 
     pub fn get_appeal(ctx: Context<GetAppeal>) -> Result<Appeal> {
         ctx.accounts.get_appeal().cloned()
     }
+
+
 
 }
 

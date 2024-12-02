@@ -52,7 +52,7 @@ impl<'info> PlaceBet<'info> {
     pub fn place_bet(
         &mut self, 
         option: u8, // Option selected by the user
-        amount: u16,
+        amount: u64,
         bumps: &PlaceBetBumps // Amount of the bet
     ) -> Result<()> {
         let list = &mut self.list;
@@ -78,7 +78,7 @@ impl<'info> PlaceBet<'info> {
 
         // Update the List state
         list.option_counts[option as usize] += 1;
-        list.pool_amount += amount as u64; // Add the amount to the pool
+        list.pool_amount += amount; // Add the amount to the pool
         list.pool_no += 1; // Increment the number of bets placed
 
         // Optionally: Implement fee deduction if required (e.g., transfer to the treasury)

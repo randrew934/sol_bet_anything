@@ -6,10 +6,11 @@ use crate::state::{List, Appeal, AdminConfig};
 use crate::error::BetError;
 
 #[derive(Accounts)]
+#[instruction(bet_key: u64)]
 pub struct MakeAppeal<'info> {
     #[account(
         mut,
-        seeds = [b"list", list.maker.key().as_ref(), &list.bet_key.to_le_bytes()],
+        seeds = [b"list", list.maker.key().as_ref(), &bet_key.to_le_bytes()],
         bump = list.bump
     )]
     pub list: Account<'info, List>,
@@ -17,7 +18,7 @@ pub struct MakeAppeal<'info> {
     #[account(
         init,
         payer = signer,
-        seeds = [b"appeal", signer.key().as_ref(), &list.bet_key.to_le_bytes()],
+        seeds = [b"appeal", signer.key().as_ref(), &bet_key.to_le_bytes()],
         bump,
         space = Appeal::INIT_SPACE
     )]
@@ -43,6 +44,7 @@ pub struct MakeAppeal<'info> {
 impl<'info> MakeAppeal<'info> {
 pub fn make_appeal(
     &mut self,
+    bet_key: u64,
     description: String,
     appeal_url: String,
     bumps: &MakeAppealBumps
@@ -58,7 +60,7 @@ pub fn make_appeal(
 
     // Update the Appeal account
     appeal.account = user.key();
-    appeal.bet_key = list.bet_key;
+    appeal.bet_key = bet_key;
     appeal.description = description;
     appeal.appeal_url = appeal_url;
     appeal.bump = bumps.appeal;

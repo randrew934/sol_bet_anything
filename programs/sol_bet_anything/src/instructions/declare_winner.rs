@@ -34,8 +34,8 @@ impl<'info> DeclareWinner<'info> {
         }
 
         // Ensure the game status is "Ended" (2)
-        if list.status != 2 {
-            return Err(error!(BetError::InvalidGameStatus)); // Game status must be "Ended"
+        if list.status != 2 && list.status != 3 {
+            return Err(error!(BetError::InvalidGameStatus)); // Game status must be "Ended" or under appeal
         }
 
         // Set the winner (the winning option)
@@ -47,7 +47,12 @@ impl<'info> DeclareWinner<'info> {
         list.declaration_timestamp = Clock::get()?.unix_timestamp as i128; // Set the timestamp of winner declaration
 
         // Change the status to "Completed" (status = 4)
-        list.status = 4;
+        if caller == self.admin_config.admin {
+            list.status = 5;
+        }else{
+            list.status = 4;
+        }
+        
 
         Ok(())
     }

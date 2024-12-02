@@ -39,3 +39,6 @@ pub use make_appeal::*;
 
 pub mod get_appeal;
 pub use get_appeal::*;
+
+pub mod set_betperiod;
+pub use set_betperiod::*;

@@ -7,13 +7,13 @@ use crate::error::BetError;
 #[derive(Accounts)]
 pub struct GetGame<'info> {
     #[account()]
-    pub list_state: Account<'info, List>, // Account to retrieve the game information from
+    pub list: Account<'info, List>, // Account to retrieve the game information from
 }
 
 impl<'info> GetGame<'info> {
     pub fn get_game(&mut self, bet_key: u64) -> Result<&List> {
         // Retrieve the game (ListState) by its bet_key
-        let list = &self.list_state;
+        let list = &self.list;
 
         // Ensure the bet_key matches the one in the ListState
         if list.bet_key != bet_key {
