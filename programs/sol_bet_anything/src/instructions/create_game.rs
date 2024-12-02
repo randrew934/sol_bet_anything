@@ -1,6 +1,6 @@
-use anchor_lang::prelude::*;
-use crate::state::{List, AdminConfig};
 use crate::error::BetError;
+use crate::state::{AdminConfig, List};
+use anchor_lang::prelude::*;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct CreateGameResponse {
@@ -35,20 +35,27 @@ pub struct CreateGame<'info> {
     )]
     pub list: Account<'info, List>,
 
+    #[account(
+        seeds = [b"list_treasury", list.key().as_ref()], 
+        bump
+    )]
+    pub list_treasury: SystemAccount<'info>,
+
     // Other associated accounts
     pub system_program: Program<'info, System>, // System program for transaction
 }
 
 impl<'info> CreateGame<'info> {
-    pub fn create_game(&mut self,        
+    pub fn create_game(
+        &mut self,
         name: String,
         description: String,
         options: Vec<String>,
         amount: u64,
         bet_period: u64,
         judge: Pubkey,
-        bumps: &CreateGameBumps) -> Result<CreateGameResponse> {
-
+        bumps: &CreateGameBumps,
+    ) -> Result<CreateGameResponse> {
         let admin_config = &mut self.admin_config;
         let list = &mut self.list;
 
@@ -63,11 +70,10 @@ impl<'info> CreateGame<'info> {
 
         // Set status based on whether judge is admin
         if judge == admin_config.admin {
-        list.status = 1; // Automatically approved
+            list.status = 1; // Automatically approved
         } else {
-        list.status = 0; // Pending approval
+            list.status = 0; // Pending approval
         }
-
 
         // Initialize options and option_counts
         let option_counts = vec![0; options.len()]; // Initialize counts for each option
@@ -91,8 +97,8 @@ impl<'info> CreateGame<'info> {
         list.declaration_timestamp = 0; // No declaration timestamp
         list.ended_timestamp = 0; // No Ended timestamp yet
         list.close_timestamp = 0; // No close timestamp yet
+        list.treasury_bump = bumps.list_treasury; //Bump for the List Treasury account
         list.bump = bumps.list; // Bump for the list account
-
 
         // Return the bet_key in the response
         Ok(CreateGameResponse {
@@ -106,9 +112,6 @@ impl<'info> CreateGame<'info> {
             judge: list.judge,
             maker: list.maker,
             status: list.status,
-
         })
     }
 }
-
-

@@ -1,6 +1,6 @@
-use anchor_lang::prelude::*;
 use crate::error::BetError;
-use crate::state::{List, AdminConfig};
+use crate::state::{AdminConfig, List};
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct EndGame<'info> {

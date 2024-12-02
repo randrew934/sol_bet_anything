@@ -3,9 +3,8 @@ use anchor_lang::{
     system_program::{transfer, Transfer},
 };
 
-use crate::state::{List, Bet};
 use crate::error::BetError;
-
+use crate::state::{Bet, List};
 
 #[derive(Accounts)]
 pub struct PlaceBet<'info> {
@@ -28,32 +27,37 @@ pub struct PlaceBet<'info> {
     )]
     pub bet: Account<'info, Bet>, // The bet placed by the user
 
+    #[account(
+        mut,
+        seeds = [b"list_treasury", list.key().as_ref()], 
+        bump
+    )]
+    pub list_treasury: SystemAccount<'info>,
+
     pub system_program: Program<'info, System>, // System program to transfer funds
 }
 
 impl<'info> PlaceBet<'info> {
     pub fn send_sol(&mut self) -> Result<()> {
-
         let amount = self.list.amount;
 
         // Construct the CPI context for the transfer
         let cpi_program = self.system_program.to_account_info();
         let cpi_accounts = Transfer {
             from: self.user.to_account_info(),
-            to: self.list.to_account_info(),
+            to: self.list_treasury.to_account_info(),
         };
         let cpi_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
         // Perform the transfer
         transfer(cpi_ctx, amount)
-
     }
 
     pub fn place_bet(
-        &mut self, 
+        &mut self,
         option: u8, // Option selected by the user
         amount: u64,
-        bumps: &PlaceBetBumps // Amount of the bet
+        bumps: &PlaceBetBumps, // Amount of the bet
     ) -> Result<()> {
         let list = &mut self.list;
         let bet = &mut self.bet;

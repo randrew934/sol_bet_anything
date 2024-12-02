@@ -1,9 +1,9 @@
+use crate::error::BetError;
+use crate::state::{AdminConfig, Appeal, List};
 use anchor_lang::{
     prelude::*,
     system_program::{transfer, Transfer},
 };
-use crate::state::{List, Appeal, AdminConfig};
-use crate::error::BetError;
 
 #[derive(Accounts)]
 #[instruction(bet_key: u64)]
@@ -23,9 +23,9 @@ pub struct MakeAppeal<'info> {
         space = Appeal::INIT_SPACE
     )]
     pub appeal: Account<'info, Appeal>,
-    
+
     #[account(mut)]
-    pub admin_config: Account<'info, AdminConfig>,  // The Admin Config containing the Appeal fee
+    pub admin_config: Account<'info, AdminConfig>, // The Admin Config containing the Appeal fee
 
     #[account(
         mut,
@@ -38,69 +38,61 @@ pub struct MakeAppeal<'info> {
     pub signer: Signer<'info>,
 
     pub system_program: Program<'info, System>,
-
 }
 
 impl<'info> MakeAppeal<'info> {
-pub fn make_appeal(
-    &mut self,
-    bet_key: u64,
-    description: String,
-    appeal_url: String,
-    bumps: &MakeAppealBumps
-) -> Result<()> {
-    let list = &mut self.list;
-    let appeal = &mut self.appeal;
-    let user = &mut self.signer;
+    pub fn make_appeal(
+        &mut self,
+        bet_key: u64,
+        description: String,
+        appeal_url: String,
+        bumps: &MakeAppealBumps,
+    ) -> Result<()> {
+        let list = &mut self.list;
+        let appeal = &mut self.appeal;
+        let user = &mut self.signer;
 
-    // Ensure the game status allows appeals
-    if list.status != 4 && list.status != 5 {
-        return Err(error!(BetError::InvalidGameStatus));
+        // Ensure the game status allows appeals
+        if list.status != 4 && list.status != 5 {
+            return Err(error!(BetError::InvalidGameStatus));
+        }
+
+        // Update the Appeal account
+        appeal.account = user.key();
+        appeal.bet_key = bet_key;
+        appeal.description = description;
+        appeal.appeal_url = appeal_url;
+        appeal.bump = bumps.appeal;
+
+        // Update the List state to indicate an appeal
+        list.appealed = 1;
+        list.status = 3;
+
+        Ok(())
     }
 
-    // Update the Appeal account
-    appeal.account = user.key();
-    appeal.bet_key = bet_key;
-    appeal.description = description;
-    appeal.appeal_url = appeal_url;
-    appeal.bump = bumps.appeal;
+    pub fn send_sol(&mut self) -> Result<()> {
+        let admin_config = &self.admin_config;
 
-    // Update the List state to indicate an appeal
-    list.appealed = 1;
-    list.status = 3;
+        let appeal_fee = admin_config.appeal_fee as u64;
 
-    Ok(())
-}
+        // Ensure the user has enough funds to pay the appeal fee
+        if self.signer.lamports() < appeal_fee {
+            return Err(error!(BetError::InsufficientFunds)); // Custom error if the user doesn't have enough SOL
+        }
 
-pub fn send_sol(
-    &mut self
-) -> Result<()> {
-    let admin_config = &self.admin_config;
+        // Prepare the CPI transfer to move the appeal fee to the treasury
+        let cpi_program = self.system_program.to_account_info();
+        let cpi_accounts = Transfer {
+            from: self.signer.to_account_info(), // User pays the fee
+            to: self.treasury.to_account_info(), // Treasury account
+        };
 
-    let appeal_fee = admin_config.appeal_fee as u64;
+        let transfer_ctx = CpiContext::new(cpi_program, cpi_accounts);
 
-    // Ensure the user has enough funds to pay the appeal fee
-    if self.signer.lamports() < appeal_fee {
-        return Err(error!(BetError::InsufficientFunds)); // Custom error if the user doesn't have enough SOL
+        // Perform the transfer of the appeal fee
+        transfer(transfer_ctx, appeal_fee)?;
+
+        Ok(())
     }
-
-    // Prepare the CPI transfer to move the appeal fee to the treasury
-    let cpi_program = self.system_program.to_account_info();
-    let cpi_accounts = Transfer {
-        from: self.signer.to_account_info(), // User pays the fee
-        to: self.treasury.to_account_info(), // Treasury account
-    };
-
-    let transfer_ctx = CpiContext::new(
-        cpi_program,
-        cpi_accounts
-    );
-
-    // Perform the transfer of the appeal fee
-    transfer(transfer_ctx, appeal_fee)?;
-
-    Ok(())
-
-
-}
 }

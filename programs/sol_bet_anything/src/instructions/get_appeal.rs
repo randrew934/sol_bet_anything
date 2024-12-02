@@ -1,11 +1,10 @@
-use anchor_lang::prelude::*;
-use crate::state::{AdminConfig, Appeal};
 use crate::error::AppealError;
+use crate::state::{AdminConfig, Appeal};
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 #[instruction(bet_account: Pubkey, bet_key: u64)]
 pub struct GetAppeal<'info> {
-
     /// Signer must match the admin in `AdminConfig`
     pub admin: Signer<'info>,
 
@@ -26,9 +25,6 @@ pub struct GetAppeal<'info> {
 impl<'info> GetAppeal<'info> {
     pub fn get_appeal(&self) -> Result<&Appeal> {
         let appeal = &self.appeal; // Borrowing appeal data
-
-        // Log or process appeal data as needed
-        msg!("Appeal fetched: {}", appeal.description);
 
         // Dereference the appeal Account to get the Appeal struct and clone it
         Ok(appeal) // Cloning the Appeal struct and returning it

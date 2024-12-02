@@ -24,4 +24,3 @@ impl<'info> GetGame<'info> {
         Ok(list) // Clone the List data from the Account
     }
 }
-

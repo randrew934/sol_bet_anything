@@ -1,23 +1,23 @@
+use crate::error::BetError;
+use crate::state::{AdminConfig, Bet, List};
 use anchor_lang::{
     prelude::*,
     system_program::{transfer, Transfer},
 };
-use crate::state::{List, Bet, AdminConfig};
-use crate::error::BetError;
 
 #[derive(Accounts)]
 pub struct PayWinner<'info> {
     #[account(mut)]
-    pub user: Signer<'info>,  // User who is receiving the payout
+    pub user: Signer<'info>, // User who is receiving the payout
 
     #[account(mut)]
-    pub list: Account<'info, List>,  // The game list containing the options and pool
+    pub list: Account<'info, List>, // The game list containing the options and pool
 
     #[account(mut)]
-    pub admin_config: Account<'info, AdminConfig>,  // The Admin Config containing the payout fee
+    pub admin_config: Account<'info, AdminConfig>, // The Admin Config containing the payout fee
 
-    #[account(mut, close = user)]  // Bet account for the user, which will be closed after payout
-    pub bet: Account<'info, Bet>,  // User's bet placed in the game
+    #[account(mut, close = user)] // Bet account for the user, which will be closed after payout
+    pub bet: Account<'info, Bet>, // User's bet placed in the game
 
     #[account(
         mut,
@@ -25,6 +25,13 @@ pub struct PayWinner<'info> {
         bump
     )]
     pub treasury: SystemAccount<'info>,
+
+    #[account(
+        mut,
+        seeds = [b"list_treasury", list.key().as_ref()], 
+        bump
+    )]
+    pub list_treasury: SystemAccount<'info>,
 
     // System program to handle transfers
     pub system_program: Program<'info, System>,
@@ -62,58 +69,49 @@ impl<'info> PayWinner<'info> {
             return Err(error!(BetError::InsufficientFunds)); // Custom error if the List PDA doesn't have enough funds
         }
 
-    // Transfer the payout from the List PDA to the user's account
-    let cpi_program = self.system_program.to_account_info();
-    let cpi_accounts = Transfer {
-        from: list.to_account_info(),
-        to: user.to_account_info(),
-    };
-    let seeds = &[
-        b"list",
-        list.maker.as_ref(),
-        &list.bet_key.to_le_bytes(),
-        &[list.bump],
-    ];
-    let pda_signer = &[&seeds[..]];
+        // Transfer the payout from the List PDA to the user's account
+        let cpi_program = self.system_program.to_account_info();
+        let cpi_accounts = Transfer {
+            from: self.list_treasury.to_account_info(),
+            to: user.to_account_info(),
+        };
+        let seeds = &[
+            b"list",
+            list.maker.as_ref(),
+            &list.bet_key.to_le_bytes(),
+            &[list.bump],
+        ];
+        let pda_signer = &[&seeds[..]];
 
-    let transfer_ctx = CpiContext::new_with_signer(
-        cpi_program,
-        cpi_accounts,
-        pda_signer,
-    );
+        let transfer_ctx = CpiContext::new_with_signer(cpi_program, cpi_accounts, pda_signer);
 
-    // Perform the transfer
-    transfer(transfer_ctx, payout)?;
+        // Perform the transfer
+        transfer(transfer_ctx, payout)?;
 
-    // Transfer the fee amount to the admin's treasury account
-    let treasury_account = self.treasury.to_account_info(); // Assuming you have the treasury account
-     // Transfer the payout from the List PDA to the user's account
-    let cpi_program = self.system_program.to_account_info();
+        // Transfer the fee amount to the admin's treasury account
+        let treasury_account = self.treasury.to_account_info();
+        let cpi_program = self.system_program.to_account_info();
 
-    let cpi_accounts_fee = Transfer {
-        from: list.to_account_info(),
-        to: treasury_account,
-    };
-    let treasury_seeds = &[
-        b"treasury",
-        admin_config.admin.as_ref(),
-        &[admin_config.treasury_bump],
-    ];
-    let treasury_signer = &[&treasury_seeds[..]];
+        let cpi_accounts_fee = Transfer {
+            from: list.to_account_info(),
+            to: treasury_account,
+        };
+        let treasury_seeds = &[
+            b"treasury",
+            admin_config.admin.as_ref(),
+            &[admin_config.treasury_bump],
+        ];
+        let treasury_signer = &[&treasury_seeds[..]];
 
-    let transfer_ctx_fee = CpiContext::new_with_signer(
-        cpi_program,
-        cpi_accounts_fee,
-        treasury_signer,
-    );
+        let transfer_ctx_fee =
+            CpiContext::new_with_signer(cpi_program, cpi_accounts_fee, treasury_signer);
 
-    // Perform the transfer of the fee to the treasury
-    transfer(transfer_ctx_fee, fee_amount)?;
+        // Perform the transfer of the fee to the treasury
+        transfer(transfer_ctx_fee, fee_amount)?;
 
+        // After the transfer, we can close the Bet account
+        **bet.to_account_info().lamports.borrow_mut() = 0;
 
-    // After the transfer, we can close the Bet account
-    **bet.to_account_info().lamports.borrow_mut() = 0;
-
-    Ok(())
+        Ok(())
     }
 }

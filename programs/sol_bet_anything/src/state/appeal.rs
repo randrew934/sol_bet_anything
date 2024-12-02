@@ -2,11 +2,11 @@ use anchor_lang::prelude::*;
 
 #[account]
 pub struct Appeal {
-    pub account: Pubkey,      // Account filing the appeal
-    pub bet_key: u64,         // Bet's associated key
-    pub description: String,  // Description of the appeal
-    pub appeal_url: String,   // Supporting documentation or URL
-    pub bump: u8,             // Bump for this PDA
+    pub account: Pubkey,     // Account filing the appeal
+    pub bet_key: u64,        // Bet's associated key
+    pub description: String, // Description of the appeal
+    pub appeal_url: String,  // Supporting documentation or URL
+    pub bump: u8,            // Bump for this PDA
 }
 
 impl Space for Appeal {

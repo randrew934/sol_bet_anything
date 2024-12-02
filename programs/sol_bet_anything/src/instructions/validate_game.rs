@@ -1,6 +1,6 @@
-use anchor_lang::prelude::*;
 use crate::error::BetError;
 use crate::state::List;
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct ValidateGame<'info> {

@@ -28,9 +28,6 @@ pub use close_game::*;
 pub mod declare_winner;
 pub use declare_winner::*;
 
-pub mod get_game_winners;
-pub use get_game_winners::*;
-
 pub mod pay_winner;
 pub use pay_winner::*;
 
@@ -42,3 +39,6 @@ pub use get_appeal::*;
 
 pub mod set_betperiod;
 pub use set_betperiod::*;
+
+pub mod withdraw;
+pub use withdraw::*;

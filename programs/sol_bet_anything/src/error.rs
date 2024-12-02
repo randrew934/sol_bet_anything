@@ -45,7 +45,7 @@ pub enum BetError {
     NoBetsPlaced,
 
     #[msg("No enough funds for the bet.")]
-    InsufficientFunds
+    InsufficientFunds,
 }
 
 #[error_code]

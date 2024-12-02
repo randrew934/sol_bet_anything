@@ -21,30 +21,40 @@ pub mod sol_bet_anything {
         ctx.accounts.change_admin(new_admin)
     }
 
-    pub fn change_admin_fee(ctx: Context<ChangeAdminFee>, new_payout_fee: u8, new_appeal_fee: u64) -> Result<()> {
-        ctx.accounts.change_admin_fee(new_payout_fee, new_appeal_fee)
+    pub fn change_admin_fee(
+        ctx: Context<ChangeAdminFee>,
+        new_payout_fee: u8,
+        new_appeal_fee: u64,
+    ) -> Result<()> {
+        ctx.accounts
+            .change_admin_fee(new_payout_fee, new_appeal_fee)
     }
 
     pub fn get_game(ctx: Context<GetGame>, bet_key: u64) -> Result<List> {
         ctx.accounts.get_game(bet_key).cloned()
     }
 
-    pub fn create_game(ctx: Context<CreateGame>,         
+    pub fn create_game(
+        ctx: Context<CreateGame>,
         name: String,
         description: String,
         options: Vec<String>,
         amount: u64,
         bet_period: u64,
-        judge: Pubkey) -> Result<CreateGameResponse> {
-
-        ctx.accounts.create_game(name, description, options, amount, bet_period, judge, &ctx.bumps)
+        judge: Pubkey,
+    ) -> Result<CreateGameResponse> {
+        ctx.accounts.create_game(
+            name,
+            description,
+            options,
+            amount,
+            bet_period,
+            judge,
+            &ctx.bumps,
+        )
     }
 
-
-    pub fn place_bet(ctx: Context<PlaceBet>,         
-        options: u8,
-        amount: u64) -> Result<()> {
-
+    pub fn place_bet(ctx: Context<PlaceBet>, options: u8, amount: u64) -> Result<()> {
         ctx.accounts.place_bet(options, amount, &ctx.bumps)?;
         ctx.accounts.send_sol()
     }
@@ -65,28 +75,30 @@ pub mod sol_bet_anything {
         ctx.accounts.declare_winner(winner)
     }
 
-    pub fn get_game_winners(ctx: Context<GetGameWinners>) -> Result<u32> {
-        ctx.accounts.get_game_winners()
+    pub fn pay_winner(ctx: Context<PayWinner>) -> Result<()> {
+        ctx.accounts.pay_winner()
     }
 
-    pub fn pay_winner(ctx: Context<SetBetPeriod>, set_period: u8) -> Result<()> {
-        ctx.accounts.set_period(set_period)
-    }
-
-    pub fn make_appeal(ctx: Context<MakeAppeal>,
+    pub fn make_appeal(
+        ctx: Context<MakeAppeal>,
         bet_key: u64,
         description: String,
-        appeal_url: String) -> Result<()> {
-
-        ctx.accounts.make_appeal(bet_key, description, appeal_url, &ctx.bumps)?;
+        appeal_url: String,
+    ) -> Result<()> {
+        ctx.accounts
+            .make_appeal(bet_key, description, appeal_url, &ctx.bumps)?;
         ctx.accounts.send_sol()
     }
 
-    pub fn get_appeal(ctx: Context<GetAppeal>) -> Result<Appeal> {
+    pub fn get_appeal(
+        ctx: Context<GetAppeal>,
+        bet_account: Pubkey,
+        bet_key: u64,
+    ) -> Result<Appeal> {
         ctx.accounts.get_appeal().cloned()
     }
 
-
-
+    pub fn withdraw(ctx: Context<Withdraw>, amount: u64) -> Result<()> {
+        ctx.accounts.withdraw(amount)
+    }
 }
-

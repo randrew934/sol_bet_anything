@@ -1,6 +1,6 @@
-use anchor_lang::prelude::*;
 use crate::error::BetError;
-use crate::state::{List, AdminConfig};
+use crate::state::{AdminConfig, List};
+use anchor_lang::prelude::*;
 
 #[derive(Accounts)]
 pub struct DeclareWinner<'info> {
@@ -10,8 +10,7 @@ pub struct DeclareWinner<'info> {
     #[account(
         mut,
         seeds = [b"list", list.maker.key().as_ref(), &list.bet_key.to_le_bytes()],
-        bump = list.bump,
-        constraint = list.status == 2 @ BetError::InvalidGameStatus // Game must be ended (status == 2)
+        bump = list.bump
     )]
     pub list: Account<'info, List>, // The game (list) for which the winner is being declared
 
@@ -21,7 +20,6 @@ pub struct DeclareWinner<'info> {
     )]
     pub admin_config: Account<'info, AdminConfig>, // Admin config holding the admin public key
 }
-
 
 impl<'info> DeclareWinner<'info> {
     pub fn declare_winner(&mut self, winner: u8) -> Result<()> {
@@ -39,7 +37,7 @@ impl<'info> DeclareWinner<'info> {
         }
 
         // Set the winner (the winning option)
-        if winner < 1 || winner > list.options.len() as u8 {
+        if winner > list.options.len() as u8 {
             return Err(error!(BetError::InvalidWinnerOption)); // Invalid winner option (must be within range)
         }
 
@@ -49,10 +47,9 @@ impl<'info> DeclareWinner<'info> {
         // Change the status to "Completed" (status = 4)
         if caller == self.admin_config.admin {
             list.status = 5;
-        }else{
+        } else {
             list.status = 4;
         }
-        
 
         Ok(())
     }
