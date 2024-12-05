@@ -16,7 +16,7 @@ pub struct PayWinner<'info> {
     #[account(mut)]
     pub admin_config: Account<'info, AdminConfig>, // The Admin Config containing the payout fee
 
-    #[account(mut, close = user)] // Bet account for the user, which will be closed after payout
+    #[account(mut)] // Bet account for the user, which will be closed after payout
     pub bet: Account<'info, Bet>, // User's bet placed in the game
 
     #[account(
@@ -71,15 +71,15 @@ impl<'info> PayWinner<'info> {
 
         // Transfer the payout from the List PDA to the user's account
         let cpi_program = self.system_program.to_account_info();
+        let binding = self.list.to_account_info().key();
         let cpi_accounts = Transfer {
             from: self.list_treasury.to_account_info(),
             to: user.to_account_info(),
         };
         let seeds = &[
-            b"list",
-            list.maker.as_ref(),
-            &list.bet_key.to_le_bytes(),
-            &[list.bump],
+            b"list_treasury",
+            binding.as_ref(),
+            &[self.list.treasury_bump],
         ];
         let pda_signer = &[&seeds[..]];
 
@@ -91,15 +91,16 @@ impl<'info> PayWinner<'info> {
         // Transfer the fee amount to the admin's treasury account
         let treasury_account = self.treasury.to_account_info();
         let cpi_program = self.system_program.to_account_info();
+        let binding = self.list.to_account_info().key();
 
         let cpi_accounts_fee = Transfer {
-            from: list.to_account_info(),
+            from: self.list_treasury.to_account_info(),
             to: treasury_account,
         };
         let treasury_seeds = &[
-            b"treasury",
-            admin_config.admin.as_ref(),
-            &[admin_config.treasury_bump],
+            b"list_treasury",
+            binding.as_ref(),
+            &[self.list.treasury_bump],
         ];
         let treasury_signer = &[&treasury_seeds[..]];
 
@@ -110,7 +111,10 @@ impl<'info> PayWinner<'info> {
         transfer(transfer_ctx_fee, fee_amount)?;
 
         // After the transfer, we can close the Bet account
-        **bet.to_account_info().lamports.borrow_mut() = 0;
+        let bet_lamports = **bet.to_account_info().lamports.borrow();
+        **self.user.to_account_info().lamports.borrow_mut() += bet_lamports; // Transfer lamports to user
+        **bet.to_account_info().lamports.borrow_mut() = 0; // Set bet account balance to zero
+        bet.to_account_info().try_borrow_mut_data()?.fill(0);
 
         Ok(())
     }

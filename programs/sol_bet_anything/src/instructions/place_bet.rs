@@ -63,6 +63,11 @@ impl<'info> PlaceBet<'info> {
         let bet = &mut self.bet;
         let user = &self.user;
 
+        // Check if the game has status 1(open)
+        if list.status != 1 {
+            return Err(error!(BetError::InvalidGameStatus));
+        }
+
         // Ensure the betting period is valid
         let current_timestamp = Clock::get()?.unix_timestamp as i128;
         if current_timestamp > list.creation_timestamp + list.bet_period as i128 {

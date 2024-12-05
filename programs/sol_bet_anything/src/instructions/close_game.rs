@@ -5,7 +5,7 @@ use anchor_lang::prelude::*;
 #[derive(Accounts)]
 pub struct CloseGame<'info> {
     #[account(mut)]
-    pub signer: Signer<'info>, // The signer (Judge or SBA Admin)
+    pub admin: Signer<'info>, // The signer (Judge or SBA Admin)
 
     #[account(
         mut,
@@ -28,6 +28,13 @@ impl<'info> CloseGame<'info> {
         // Check if the game has either status 4 (ended but not closed) or 5 (appealed)
         if list.status != 4 && list.status != 5 {
             return Err(error!(BetError::InvalidGameStatus)); // Custom error if the game is not in a valid status to close
+        }
+
+        // Ensure the caller is authorized (Judge, Maker, or Admin)
+        let caller = self.admin.key();
+
+        if caller != self.admin_config.admin {
+            return Err(error!(BetError::UnauthorizedAccess)); // Custom error
         }
 
         // Update the close timestamp to the current time

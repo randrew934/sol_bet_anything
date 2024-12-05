@@ -43,9 +43,9 @@ impl<'info> EndGame<'info> {
 
         // Set the status based on who called the instruction
         if caller == admin_config.admin {
-            list.status = 3; // Admin ends the game
+            list.status = 7; // Admin ends the game
         } else if caller == list.judge {
-            list.status = 4; // Judge ends the game
+            list.status = 2; // Judge ends the game
         } else {
             return Err(error!(BetError::UnauthorizedAccess)); // If not admin or judge
         }

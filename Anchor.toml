@@ -5,13 +5,13 @@ resolution = true
 skip-lint = false
 
 [programs.devnet]
-sol_bet_anything = "Be8umEHvehjUjfXJBYaLMtSUDoFKDoHFC5MEZMxgm2BH"
+sol_bet_anything = "BtYYc5eyu3Eg1WPsJTE3mh1yXFeknwH4xyqhKL8qRUzW"
 
 [registry]
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "Devnet"
 wallet = "~/.config/solana/id.json"
 
 [scripts]

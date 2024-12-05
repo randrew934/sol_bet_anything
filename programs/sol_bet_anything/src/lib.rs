@@ -7,7 +7,7 @@ use anchor_lang::prelude::*;
 pub use instructions::*;
 pub use state::*;
 
-declare_id!("Be8umEHvehjUjfXJBYaLMtSUDoFKDoHFC5MEZMxgm2BH");
+declare_id!("BtYYc5eyu3Eg1WPsJTE3mh1yXFeknwH4xyqhKL8qRUzW");
 
 #[program]
 pub mod sol_bet_anything {

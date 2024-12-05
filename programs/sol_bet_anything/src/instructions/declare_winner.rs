@@ -31,9 +31,9 @@ impl<'info> DeclareWinner<'info> {
             return Err(error!(BetError::UnauthorizedAccess)); // Custom error
         }
 
-        // Ensure the game status is "Ended" (2)
-        if list.status != 2 && list.status != 3 {
-            return Err(error!(BetError::InvalidGameStatus)); // Game status must be "Ended" or under appeal
+        // Ensure the game status is "Ended" (2) or "Appeal" (3) or "Advisement" (7)
+        if list.status != 2 && list.status != 3 && list.status != 7 {
+            return Err(error!(BetError::InvalidGameStatus)); // Game status must be "Ended" or under appeal or under advisement
         }
 
         // Set the winner (the winning option)

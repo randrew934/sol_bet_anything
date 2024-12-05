@@ -53,7 +53,7 @@ impl<'info> MakeAppeal<'info> {
         let user = &mut self.signer;
 
         // Ensure the game status allows appeals
-        if list.status != 4 && list.status != 5 {
+        if list.status != 4 && list.status != 5 && list.status != 7 && list.status != 3 {
             return Err(error!(BetError::InvalidGameStatus));
         }
 
