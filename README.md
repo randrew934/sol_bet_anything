@@ -52,9 +52,11 @@ For SBA Judge, the maker is required to submit an advisement which is the same a
 
 **validateGame**: Judge provided accepts its role in the game. If SBA Judge is set, the process is handled automatically. There’s no need to call validateGame.
 
-**placeBet**: Users can get to place a bet on the game.
+**placeBet**: Users can get to place a bet on the game created.
 
-**endGame**: For the admin to end the game once a bet period has been reached. **declareWinner**: For the judge or admin to declare the winner of the game.
+**endGame**: For the admin to end the game once a bet period has been reached. 
+
+**declareWinner**: For the judge or admin to declare the winner of the game.
 
 **makeAppeal**: For the user to appeal the declaration of the winner before the game is finally closed.
 
@@ -62,7 +64,11 @@ For SBA Judge, the maker is required to submit an advisement which is the same a
 
 **closeGame**: After the appeal period has been exceeded. The game is closed by the admin.
 
-**payWinner**: This is used to pay the winner of the game. **changeAdmin**: To change the current admin account. **changeAdminFees**: To change the fees of the Admin.
+**payWinner**: This is used to pay the winner of the game. 
+
+**changeAdmin**: To change the current admin account. 
+
+**changeAdminFees**: To change the fees of the Admin.
 
 **withdraw**: To withdraw from the Treasury to the Admin Account
 
