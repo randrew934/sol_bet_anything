@@ -2,7 +2,7 @@
 
 ### Your Game. Your Rules
 
-Bet anything from Sports games to Event forecasts to Token Predictions to X(Twitter) Banters. All you need is Solana.
+Bet anything from Sports games to Event forecasts to Token Predictions to X(Twitter) Banters.
 
 ## RUST PROGRAM INFORMATION:
 
