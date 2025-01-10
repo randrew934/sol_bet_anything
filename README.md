@@ -2,7 +2,7 @@
 
 ### Your Game. Your Rules
 
-Bet anything from Sports games to Event forecasts to Token Predictions to Sports Games to X(Twitter) Banters. Built with Anchor(SVM Compatible including SVM API Rollups).
+Bet anything from Sports games to Event forecasts to Token Predictions to Sports Games to X(Twitter) Banters. Built with Anchor(SVM Compatible).
 
 ## RUST PROGRAM INFORMATION:
 
