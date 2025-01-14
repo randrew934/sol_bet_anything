@@ -68,7 +68,7 @@ For SBA Judge, the maker is required to submit an advisement which is the same a
 
 **changeAdmin**: To change the current admin account. 
 
-**changeAdminFees**: To change the fees of the Admin.
+**changeAdminFees**: To change the fees charged by the Admin.
 
 **withdraw**: To withdraw from the Treasury to the Admin Account
 
