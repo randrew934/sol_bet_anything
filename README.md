@@ -1,6 +1,5 @@
 ﻿# SOL BET ANYTHING(Capstone Project)
 
-
 ### Your Game. Your Rules
 
 Bet anything from Sports games to Event forecasts to Token Predictions to Sports Games to X(Twitter) Banters. Built with Anchor(SVM Compatible).
