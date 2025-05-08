@@ -1,4 +1,4 @@
-﻿# SOL BET ANYTHING(Capstone Project)
+﻿# SOL BET ANYTHING PROGRAM
 
 ### Your Game. Your Rules
 
